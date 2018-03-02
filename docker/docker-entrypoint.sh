@@ -20,7 +20,7 @@ if [ -z "$@" ]; then
   echoWarning "APPLICATION_IP: ${APPLICATION_IP}"
   echoWarning "APPLICATION_PORT: ${APPLICATION_PORT}"
   echoWarning "INDY_WALLET_SEED: ${INDY_WALLET_SEED}"
-  echoWarning "----------------------------------------------------------------------------------"  
+  echoWarning "----------------------------------------------------------------------------------"
 
   set "${TEMPLATE_NAME}" "python" "manage.py" "runserver" "${APPLICATION_IP}:${APPLICATION_PORT}"
 fi
@@ -36,11 +36,14 @@ echo "==========================================================================
 
 if [ -d "${TEMPLATE_DIRECTORY}" ]; then
     echo "Copying template directory; ${TEMPLATE_DIRECTORY} ..."
-    cp "${TEMPLATE_DIRECTORY}"/* . 
+    cp "${TEMPLATE_DIRECTORY}"/* .
 else
     echo "Directory ${TEMPLATE_DIRECTORY} doesn't exist."
     exit 1
 fi
+
+# activate virtualenv
+source /build/bin/activate
 
 # python3 manage.py migrate
 echo "Starting server ..."

@@ -1,21 +1,26 @@
-FROM python-libindy:latest
+FROM agent1:latest
+# python-libindy:latest
 
 ENV HOME=/app
 WORKDIR $HOME
 
-RUN mkdir -p /app/.indy_client/wallet
+USER root
+RUN apk add git postgresql-dev
+
+ARG wallet_path=$HOME/.indy_client/wallet
+ADD ./docker/docker-entrypoint.sh /usr/local/bin/enter
+
+RUN mkdir -p "$wallet_path" && \
+    chown -R indy:0 $HOME /usr/local/bin "$wallet_path" \
+    && chmod -R ug+rwx $HOME /usr/local/bin "$wallet_path"
+
+USER indy
 
 COPY ./src/requirements.txt $HOME/
-
-RUN pip install -r requirements.txt
+RUN source $BUILD/bin/activate && \
+    pip install -r requirements.txt
 
 ADD ./src $HOME
 ADD ./site_templates $HOME/site_templates
-ADD ./docker/docker-entrypoint.sh /usr/local/bin/enter
 
-RUN chgrp -R 0 $HOME /usr/local/bin /app/.indy_client/wallet \
-  && chmod -R g+rwx $HOME /usr/local/bin /app/.indy_client/wallet
-
-USER 10001
-
-ENTRYPOINT ["enter"]
+ENTRYPOINT ["sh", "/usr/local/bin/enter"]

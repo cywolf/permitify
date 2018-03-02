@@ -1,14 +1,56 @@
-FROM libindy:latest
-
-# Install environment
-RUN apt-get update -y && apt-get install -y \
-    python3.5 \
-    python3-pip \
-    python-setuptools \
-    python3-nacl
+FROM alpine:3.7
 
 ENV HOME=/app
-WORKDIR $HOME
+ENV BUILD=/build
+WORKDIR $BUILD
+RUN adduser -u 1000 -DG root indy
+
+RUN echo '@alpine36 http://dl-cdn.alpinelinux.org/alpine/v3.6/main' >> /etc/apk/repositories
+
+# install system packages
+# need slightly older versions of libsodium (with aes128 support) and libressl
+RUN apk update && \
+    apk add --no-cache \
+    # to support TLS 1.2 \
+        wget \
+    # to build indy-sdk \
+        build-base \
+        musl=1.1.18-r3 \
+        ca-certificates \
+        cmake \
+        rust \
+        cargo \
+        libressl-dev@alpine36 \
+        libsodium-dev@alpine36 \
+        sqlite-dev \
+    # to build indy-anoncreds (and pbc library) \
+        python3-dev \
+        py3-pynacl \
+        linux-headers \
+        gmp-dev \
+        bison \
+        flex
+
+# build pbc library (not in alpine repo)
+ARG pbc_lib_ver=0.5.14
+RUN wget https://crypto.stanford.edu/pbc/files/pbc-${pbc_lib_ver}.tar.gz && \
+    tar xzvf pbc-${pbc_lib_ver}.tar.gz && \
+    cd pbc-${pbc_lib_ver} && \
+    ./configure && \
+    make install && \
+    cd $BUILD && \
+    rm -rf pbc-${pbc_lib_ver}*
+
+# build indy-sdk from git repo
+ARG indy_lib_ver=1.1.0
+RUN wget -O indy-sdk-${indy_lib_ver}.tar.gz \
+        https://github.com/hyperledger/indy-sdk/archive/v${indy_lib_ver}.tar.gz && \
+    tar xzvf indy-sdk-${indy_lib_ver}.tar.gz && \
+    cd indy-sdk-${indy_lib_ver}/libindy && \
+    cargo build && \
+    mv target/debug/libindy.so /usr/lib && \
+    cd $BUILD && \
+    rm -rf indy-sdk-*
 
 # - Create a Python virtual environment for use by any application to avoid
 #   potential conflicts with Python packages preinstalled in the main Python
@@ -16,21 +58,24 @@ WORKDIR $HOME
 # - In order to drop the root user, we have to make some directories world
 #   writable as OpenShift default security model is to run the container
 #   under random UID.
-RUN ln -sf /usr/bin/python3 /usr/bin/python
-RUN ln -sf /usr/bin/pip3 /usr/bin/pip
-RUN pip install virtualenv 
-RUN virtualenv $HOME
+RUN ln -sf /usr/bin/python3 /usr/bin/python && \
+    ln -sf /usr/bin/pip3 /usr/bin/pip && \
+    pip install virtualenv && \
+    virtualenv $BUILD
 
-ARG indy_plenum_ver=1.2.173
-ARG indy_anoncreds_ver=1.0.32
-ARG indy_node_ver=1.2.214
-ARG python3_indy_crypto_ver=0.1.6
-ARG indy_crypto_ver=0.1.6
+# install indy python packages
+RUN source bin/activate && \
+    pip install \
+        indy-plenum-dev==1.2.173 \
+        indy-anoncreds-dev==1.0.32 \
+        indy-node-dev==1.2.214
 
-RUN apt-get update -y && apt-get install -y \
-        indy-plenum=${indy_plenum_ver} \
-        indy-anoncreds=${indy_anoncreds_ver} \
-        indy-node=${indy_node_ver} \
-        python3-indy-crypto=${python3_indy_crypto_ver} \
-        libindy-crypto=${indy_crypto_ver} \
-        vim
+# clean up unneeded packages
+RUN apk del rust cargo bison flex && \
+    rm -rf $HOME/.cache $HOME/.cargo
+
+# drop privileges
+RUN chown -R indy $BUILD $HOME
+USER indy
+
+CMD ["sh"]
