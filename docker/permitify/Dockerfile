@@ -1,11 +1,11 @@
-FROM agent1:latest
-# python-libindy:latest
+FROM python-libindy:latest
 
 ENV HOME=/app
 WORKDIR $HOME
-
 USER root
-RUN apk add git postgresql-dev
+
+# needed for external dependencies
+RUN apk add --no-cache git
 
 ARG wallet_path=$HOME/.indy_client/wallet
 ADD ./docker/docker-entrypoint.sh /usr/local/bin/enter
