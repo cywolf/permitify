@@ -16,13 +16,13 @@ config = Configurator().config
 WALLET_SEED = os.environ.get('INDY_WALLET_SEED')
 if not WALLET_SEED or len(WALLET_SEED) is not 32:
     raise Exception('INDY_WALLET_SEED must be set and be 32 characters long.')
-
+GENESIS_PATH = os.environ.get('INDY_GENESIS_PATH', '/app/.genesis')
 
 class Issuer:
     def __init__(self):
         self.pool = NodePool(
             'permitify-issuer',
-            '/app/.genesis')
+            GENESIS_PATH)
 
         self.instance = VonIssuer(
             self.pool,
@@ -49,7 +49,7 @@ class Verifier:
     def __init__(self):
         self.pool = NodePool(
             'permitify-verifier',
-            '/app/.genesis')
+            GENESIS_PATH)
 
         self.instance = VonVerifier(
             self.pool,
@@ -76,7 +76,7 @@ class Holder:
     def __init__(self):
         self.pool = NodePool(
             'permitify-holder',
-            '/app/.genesis')
+            GENESIS_PATH)
 
         self.instance = VonHolderProver(
             self.pool,

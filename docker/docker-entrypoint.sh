@@ -43,7 +43,7 @@ else
 fi
 
 # activate virtualenv
-source /build/bin/activate
+source /opt/app-root/bin/activate
 
 # python3 manage.py migrate
 echo "Starting server ..."

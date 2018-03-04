@@ -17,9 +17,9 @@ services:
     # links:
     #   - postgres
     volumes:
-      - ../src:/app
-      - ../site_templates:/app/site_templates
-      - bc_registries_wallet:/app/.indy_client/wallet
+      - ../src:/opt/app-root/src
+      - ../site_templates:/opt/app-root/src/site_templates
+      - bc_registries_wallet:/opt/app-root/.indy_client/wallet
     ports:
       - 5000:8080
 
@@ -39,9 +39,9 @@ services:
     # links:
     #   - postgres
     volumes:
-      # - ./src:/app
-      # - ./site_templates:/app/site_templates
-      - worksafe_bc_wallet:/app/.indy_client/wallet
+      # - ../src:/opt/app-root/src
+      # - ../site_templates:/opt/app-root/src/site_templates
+      - worksafe_bc_wallet:/opt/app-root/.indy_client/wallet
     ports:
       - 5001:8080
 
@@ -61,9 +61,9 @@ services:
     # links:
     #   - postgres
     volumes:
-      # - ./src:/app
-      # - ./site_templates:/app/site_templates
-      - ministry_of_finance_wallet:/app/.indy_client/wallet
+      # - ../src:/opt/app-root/src
+      # - ../site_templates:/opt/app-root/src/site_templates
+      - ministry_of_finance_wallet:/opt/app-root/.indy_client/wallet
     ports:
       - 5002:8080
 
@@ -83,9 +83,9 @@ services:
     # links:
     #   - postgres
     volumes:
-      # - ../src:/app
-      # - ../site_templates:/app/site_templates
-      - fraser_valley_health_authority_wallet:/app/.indy_client/wallet
+      # - .../src:/opt/app-root/src
+      # - .../site_templates:/opt/app-root/src/site_templates
+      - fraser_valley_health_authority_wallet:/opt/app-root/.indy_client/wallet
     ports:
       - 5003:8080
 
@@ -105,9 +105,9 @@ services:
     # links:
     #   - postgres
     volumes:
-      # - ../src:/app
-      # - ../site_templates:/app/site_templates
-      - city_of_surrey_wallet:/app/.indy_client/wallet
+      # - .../src:/opt/app-root/src
+      # - .../site_templates:/opt/app-root/src/site_templates
+      - city_of_surrey_wallet:/opt/app-root/.indy_client/wallet
     ports:
       - 5004:8080
 
@@ -127,9 +127,9 @@ services:
     # links:
     #   - postgres
     volumes:
-      # - ../src:/app
-      # - ../site_templates:/app/site_templates
-      - liquor_control_and_licensing_branch_wallet:/app/.indy_client/wallet
+      # - .../src:/opt/app-root/src
+      # - .../site_templates:/opt/app-root/src/site_templates
+      - liquor_control_and_licensing_branch_wallet:/opt/app-root/.indy_client/wallet
     ports:
       - 5005:8070
 
